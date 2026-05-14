@@ -11,25 +11,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("soc-app")
-                }
+                bat 'docker build -t soc-app .'
             }
         }
 
         stage('Stop Old Container') {
             steps {
-                script {
-                    sh 'docker rm -f soc-container || true'
-                }
+                bat 'docker stop soc-container || exit 0'
+                bat 'docker rm soc-container || exit 0'
             }
         }
 
         stage('Run New Container') {
             steps {
-                script {
-                    sh 'docker run -d -p 5000:5000 --name soc-container soc-app'
-                }
+                bat 'docker run -d -p 5000:5000 --name soc-container soc-app'
             }
         }
     }
