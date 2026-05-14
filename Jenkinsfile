@@ -5,7 +5,7 @@ pipeline {
 
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/your-username/soc-devsecops.git'
+                git  'https://github.com/snehalahiri2005/SocProj.git'
             }
         }
 
