@@ -1,8 +1,18 @@
 from flask import Flask, request, render_template, jsonify
 from datetime import datetime, timedelta
 import random
+from flask_mail import Mail, Message
+import os
 
 app = Flask(__name__)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'snehalahiri73@gmail.com'
+app.config['MAIL_PASSWORD'] = 'wsik tohy fmag lkgz'
+app.config['MAIL_DEFAULT_SENDER'] = '1by23is212@gmail.com'
+
+mail = Mail(app)
 
 # ---------------- DATA ----------------
 attempts = {}
@@ -12,6 +22,52 @@ logs = []
 timeline = []
 
 VALID_USERS = {"admin": "1234", "user": "1234"}
+
+import time
+
+LOG_FILE = 'auth.log'
+
+
+def monitor_logs():
+    with open(LOG_FILE, 'r') as file:
+        file.seek(0, 2)
+
+        while True:
+            line = file.readline()
+
+            if not line:
+                time.sleep(0.5)
+                continue
+
+            if 'Failed password' in line:
+                print('Attack Detected:', line)
+
+#-----------------------Mail-----------------------
+def send_alert_email(ip, attack_type):
+    try:
+        msg = Message(
+            subject='SOC ALERT: Attack Detected',
+            recipients=['admin@gmail.com']
+        )
+
+        msg.body = f'''
+        ALERT: Suspicious activity detected.
+
+        Attack Type: {attack_type}
+        Attacker IP: {ip}
+
+        Action Taken:
+        - Logged in SOC Dashboard
+        - IP Monitored
+
+        Please investigate immediately.
+        '''
+
+        mail.send(msg)
+        print('Alert email sent successfully')
+
+    except Exception as e:
+        print(f'Email Error: {e}')
 
 # ---------------- CLEAN BLOCK EXPIRE ----------------
 def cleanup_blocks():
@@ -59,7 +115,8 @@ def simulate_attack(ip, username):
         blocked_users[username] = now + timedelta(seconds=120)
 
     attack_type = "Brute Force" if count > 5 else "Normal"
-
+    if count >= 5:
+        send_alert_email(ip, attack_type)
     # log entry
     loc = get_location(ip)
 
@@ -269,7 +326,9 @@ def attacker_ui():
     </body>
     </html>
     """
+import threading
 
+threading.Thread(target=monitor_logs, daemon=True).start()
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
