@@ -393,10 +393,6 @@ Temporary blocking durations:
 **GitHub Repository:**  
 https://github.com/snehalahiri2005/SocProj
 
-**Institution:** BMS Institute of Technology and Management
-
-**Department:** Information Science and Engineering
-
 ---
 
 ⭐ If you find this project interesting, consider starring the repository!
